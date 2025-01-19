@@ -8,24 +8,30 @@ export const AuthContextProvider = ({ children }) => {
 
   useEffect(() => {
     // onAuthStateChanged
-    setTimeout(() => {
-      seIsAuthenticated(true);
-    }, 3000);
+    // setTimeout(() => {
+    seIsAuthenticated(false);
+    // }, 3000);
   }, []);
 
   const login = async (email, password) => {
     try {
-    } catch (error) {}
+    } catch (error) {
+      console.log(`Error login`, error);
+    }
   };
 
   const logout = async () => {
     try {
-    } catch (error) {}
+    } catch (error) {
+      console.log(`Error logout`, error);
+    }
   };
 
   const register = async (email, password, username, profileUrl) => {
     try {
-    } catch (error) {}
+    } catch (error) {
+      console.log(`Error register`, error);
+    }
   };
 
   return (

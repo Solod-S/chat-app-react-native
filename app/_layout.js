@@ -26,12 +26,16 @@ const MainLayout = () => {
     }
   }, [isAuthenticated]);
 
-  return <Slot />;
+  return (
+    <View className="flex-1 bg-white">
+      <Slot />
+    </View>
+  );
 };
 
 export default function RootLayout() {
   return (
-    <AuthContextProvider className="flex-1">
+    <AuthContextProvider>
       <MainLayout />
     </AuthContextProvider>
   );
