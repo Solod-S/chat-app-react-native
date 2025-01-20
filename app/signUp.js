@@ -19,9 +19,12 @@ import { CustomKeyboardView, Loading } from "../components";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
+import { useAuth } from "../context/authContext";
 
 export default function SignUp() {
+  const { register } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [secureTextEntry, setSecureTextEntry] = useState(true);
   const router = useRouter();
 
   const emailRef = useRef("");
@@ -30,17 +33,24 @@ export default function SignUp() {
   const profileUrlRef = useRef("");
 
   const handleRegister = async () => {
-    if (
-      !emailRef.current ||
-      !passwordRef.current ||
-      !userNameRef.current ||
-      !profileUrlRef.current
-    ) {
+    if (!emailRef.current || !passwordRef.current || !userNameRef.current) {
       Alert.alert("Sign up", "Please fill all the fields");
       return;
     }
 
     // registration process
+    setLoading(true);
+    const response = await register(
+      emailRef.current,
+      passwordRef.current,
+      userNameRef.current,
+      profileUrlRef.current
+    );
+    setLoading(false);
+    console.log(`got response`, response);
+    if (!response.success) {
+      Alert.alert("Sign up", response.message);
+    }
   };
   return (
     <CustomKeyboardView>
@@ -98,12 +108,16 @@ export default function SignUp() {
               style={{ height: hp(7) }}
               className="flex-row gap-4 px-4 bg-neutral-100 items-center rounded-xl"
             >
-              <Octicons name="lock" size={hp(2.7)} color="gray" />
+              <Pressable
+                onPress={() => setSecureTextEntry(prevState => !prevState)}
+              >
+                <Octicons name="lock" size={hp(2.7)} color="gray" />
+              </Pressable>
               <TextInput
                 onChangeText={value => (passwordRef.current = value)}
                 style={{ fontSize: hp(2) }}
                 placeholder="Password"
-                secureTextEntry
+                secureTextEntry={secureTextEntry}
                 placeholderTextColor={"gray"}
                 className="flex-1 font-semibold text-neutral-700"
               />

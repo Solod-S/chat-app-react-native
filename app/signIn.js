@@ -17,28 +17,28 @@ import { Loading, CustomKeyboardView } from "../components";
 
 import Octicons from "@expo/vector-icons/Octicons";
 import { useRouter } from "expo-router";
+import { useAuth } from "../context/authContext";
 
 export default function SignIn() {
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [secureTextEntry, setSecureTextEntry] = useState(true);
   const router = useRouter();
 
   const emailRef = useRef("");
   const passwordRef = useRef("");
-  const userNameRef = useRef("");
-  const profileUrlRef = useRef("");
 
   const handleLogin = async () => {
-    if (
-      !emailRef.current ||
-      !passwordRef.current ||
-      !userNameRef.current ||
-      !profileUrlRef
-    ) {
+    if (!emailRef.current || !passwordRef.current) {
       Alert.alert("Sign in", "Please fill all the fields");
       return;
     }
-
-    // login process
+    setLoading(true);
+    const response = await login(emailRef.current, passwordRef.current);
+    setLoading(false);
+    if (!response.success) {
+      Alert.alert("Sign in", response.message);
+    }
   };
   return (
     <CustomKeyboardView>
@@ -82,12 +82,16 @@ export default function SignIn() {
                 style={{ height: hp(7) }}
                 className="flex-row gap-4 px-4 bg-neutral-100 items-center rounded-xl"
               >
-                <Octicons name="lock" size={hp(2.7)} color="gray" />
+                <Pressable
+                  onPress={() => setSecureTextEntry(prevState => !prevState)}
+                >
+                  <Octicons name="lock" size={hp(2.7)} color="gray" />
+                </Pressable>
                 <TextInput
                   onChangeText={value => (passwordRef.current = value)}
                   style={{ fontSize: hp(2) }}
                   placeholder="Password"
-                  secureTextEntry
+                  secureTextEntry={secureTextEntry}
                   placeholderTextColor={"gray"}
                   className="flex-1 font-semibold text-neutral-700"
                 />
