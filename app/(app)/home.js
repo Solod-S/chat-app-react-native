@@ -15,7 +15,7 @@ export default function Home() {
   };
 
   return (
-    <View className="bg-slate-50 flex-1 gap-12 items-center py-4">
+    <View className="bg-white flex-1 ">
       <Text>home</Text>
       <TouchableOpacity onPress={handleLogOut}>
         <Text>Sign Out</Text>
