@@ -1,25 +1,52 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import React from "react";
+import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StatusBar } from "expo-status-bar";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
+
 import { useAuth } from "../../context/authContext";
+import { ChatList, Loading } from "../../components";
+import { getDoc, getDocs, query, where } from "firebase/firestore";
+import { usersRef } from "../../firebaseConfig";
 
 export default function Home() {
-  const { logout, user } = useAuth();
+  const { user } = useAuth();
 
-  console.log(`user data: `, user);
-  const handleLogOut = async () => {
+  const [users, setUsers] = useState([1, 2, 3]);
+
+  useEffect(() => {
+    console.log(`current userId: `, user?.userId);
+    if (user?.userId) getUser();
+  }, [user]);
+
+  const getUser = async () => {
     try {
-      await logout();
+      const q = query(usersRef, where("userId", "!=", user?.userId));
+      const querySnapshot = await getDocs(q);
+      // console.log(`querySnapshot`, querySnapshot);
+      let data = [];
+      querySnapshot.forEach(doc => {
+        data.push(doc.data());
+      });
+
+      setUsers(data);
     } catch (error) {
-      console.log("error in logout:", error.message);
+      console.log(`Error in getUser: `, error.message);
     }
   };
 
   return (
     <View className="bg-white flex-1 ">
-      <Text>home</Text>
-      <TouchableOpacity onPress={handleLogOut}>
-        <Text>Sign Out</Text>
-      </TouchableOpacity>
+      <StatusBar style="light" />
+      {users?.length > 0 ? (
+        <ChatList users={users} />
+      ) : (
+        <View className="flex items-center" style={{ top: hp(30) }}>
+          <Loading size={hp(6.5)} />
+        </View>
+      )}
     </View>
   );
 }
