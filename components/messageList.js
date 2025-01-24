@@ -1,10 +1,24 @@
-import { View, Text } from "react-native";
-import React from "react";
+import { View, ScrollView } from "react-native";
+import React, { useRef } from "react";
+import { MessageItem } from "./messageItem";
 
-export function MessageList() {
+export function MessageList({ messages, currentUser }) {
+  const scrollViewRef = useRef(null);
+  const handleContentSizeChange = () => {
+    // Прокрутка к концу, как только содержимое изменяется
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  };
+
   return (
-    <View>
-      <Text>messageList</Text>
-    </View>
+    <ScrollView
+      ref={scrollViewRef}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ padding: 10 }}
+      onContentSizeChange={handleContentSizeChange}
+    >
+      {messages.map((message, index) => (
+        <MessageItem message={message} key={index} currentUser={currentUser} />
+      ))}
+    </ScrollView>
   );
 }

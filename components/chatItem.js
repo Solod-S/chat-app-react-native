@@ -1,4 +1,4 @@
-import { blurhash } from "@/ustils";
+import { blurhash } from "@/utils";
 import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import {

@@ -6,3 +6,4 @@ export { ChatList } from "./chatList";
 export { ChatItem } from "./chatItem";
 export { ChatRoomHeader } from "./chatRoomHeader";
 export { MessageList } from "./messageList";
+export { MessageItem } from "./messageItem";

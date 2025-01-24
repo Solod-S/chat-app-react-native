@@ -22,6 +22,7 @@ export function CustomKeyboardView({ children, inChat }) {
         {...scrollViewConfig}
         showsVerticalScrollIndicator={false}
         bounces={false}
+        keyboardShouldPersistTaps="handled" // предотвращает потерю фокуса и закрытие клавиатуры в чте
       >
         {children}
       </ScrollView>

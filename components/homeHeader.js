@@ -14,7 +14,7 @@ import {
 } from "react-native-popup-menu";
 import { AntDesign, Feather } from "@expo/vector-icons";
 
-import { blurhash } from "@/ustils";
+import { blurhash } from "@/utils";
 import { useAuth } from "@/context/authContext";
 import { CustomMenuItems } from "./customMenuItems";
 
