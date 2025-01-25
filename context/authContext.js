@@ -6,7 +6,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth, db } from "../firebaseConfig";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 const AuthContext = createContext();
 
@@ -103,9 +103,31 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  const updateUserInfo = async (username, profileUrl) => {
+    try {
+      const userDocRef = doc(db, "users", user?.userId);
+
+      await updateDoc(userDocRef, {
+        username: username,
+        profileUrl: profileUrl,
+      });
+
+      setUser(prevUser => ({
+        ...prevUser,
+        username: username || prevUser.username,
+        profileUrl: profileUrl || prevUser.profileUrl,
+      }));
+
+      return { success: true };
+    } catch (error) {
+      console.log("Error updating user info:", error);
+      return { success: false, message: error.message };
+    }
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, login, register, logout }}
+      value={{ user, isAuthenticated, login, register, logout, updateUserInfo }}
     >
       {children}
     </AuthContext.Provider>

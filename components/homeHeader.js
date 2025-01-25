@@ -17,15 +17,17 @@ import { AntDesign, Feather } from "@expo/vector-icons";
 import { blurhash } from "@/utils";
 import { useAuth } from "@/context/authContext";
 import { CustomMenuItems } from "./customMenuItems";
+import { useRouter } from "expo-router";
 
 const ios = Platform.OS == "ios";
 
 export function HomeHeader() {
+  const router = useRouter();
   const { user, logout } = useAuth();
   const { top } = useSafeAreaInsets();
 
   const handleProfile = () => {
-    return;
+    router.push({ pathname: "/profilePage", params: user });
   };
 
   const handleLogOut = async () => {

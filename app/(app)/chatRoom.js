@@ -1,4 +1,11 @@
-import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Keyboard,
+} from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -26,11 +33,13 @@ export default function ChatRoom() {
   const router = useRouter();
   const { user } = useAuth();
   const item = useLocalSearchParams();
-  const [messages, setMessages] = useState([]);
+  const scrollViewRef = useRef(null);
   const textRef = useRef("");
   const inputRef = useRef(null);
   const [roomId, setRoomId] = useState("");
+  const [messages, setMessages] = useState([]);
 
+  // get room msgs
   useEffect(() => {
     const roomId = getRoomId(user?.userId, item?.userId);
     setRoomId(roomId);
@@ -47,9 +56,25 @@ export default function ChatRoom() {
       });
       setMessages([...allMessages]);
     });
+
     return unSub;
   }, [user?.userId, item?.userId]);
 
+  // update scroll view keyboard
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      updateScrollView
+    );
+    return () => {
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
+  // update scroll view position
+  useEffect(() => {
+    updateScrollView();
+  }, [messages]);
   const createRoomIfNotExist = async roomId => {
     try {
       await setDoc(doc(db, "rooms", roomId), {
@@ -88,6 +113,13 @@ export default function ChatRoom() {
     }
   };
 
+  const updateScrollView = () => {
+    setTimeout(() => {
+      // Прокрутка к концу, как только содержимое изменяется
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  };
+
   return (
     <CustomKeyboardView inChat={true}>
       <View className="flex-1 bg-white">
@@ -96,7 +128,12 @@ export default function ChatRoom() {
         <View className="h-3 border-b border-neutral-300" />
         <View className="flex-1 justify-between bg-neutral-100 overflow-visible">
           <View className="flex-1">
-            <MessageList messages={messages} currentUser={user} />
+            <MessageList
+              scrollViewRef={scrollViewRef}
+              handleContentSizeChange={updateScrollView}
+              messages={messages}
+              currentUser={user}
+            />
           </View>
           <View style={{ marginBottom: hp(2.7) }} className="pt-2 mx-3">
             <View className="flex-row justify-between bg-white border border-neutral-300 rounded-full pl-5 p-2">

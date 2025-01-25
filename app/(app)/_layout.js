@@ -5,6 +5,7 @@ export default function _layout() {
   return (
     <Stack>
       <Stack.Screen name="home" options={{ header: () => <HomeHeader /> }} />
+      <Stack.Screen name="profilePage" options={{ headerShown: false }} />
     </Stack>
   );
 }
