@@ -6,8 +6,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth, db } from "../firebaseConfig";
-import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { getExpoPushNotificationToken } from "../utils";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 const AuthContext = createContext();
 
@@ -19,6 +18,7 @@ export const AuthContextProvider = ({ children }) => {
   useEffect(() => {
     const unSub = onAuthStateChanged(auth, user => {
       try {
+        // console.log("Auth state changed for:", user?.email);
         if (user) {
           seIsAuthenticated(true);
           setUser(user);
@@ -37,22 +37,6 @@ export const AuthContextProvider = ({ children }) => {
     return unSub;
   }, []);
 
-  const updateTokenData = async id => {
-    try {
-      const token = await getExpoPushNotificationToken();
-      if (!token) return;
-
-      const docRef = doc(db, "users", id);
-      await updateDoc(docRef, {
-        tokens: arrayUnion(token),
-      });
-
-      await getDoc(docRef);
-    } catch (error) {
-      console.log(`Error in updateTokenData :`, error);
-    }
-  };
-
   const updateUserData = async id => {
     const docRef = doc(db, "users", id);
     const docSnap = await getDoc(docRef);
@@ -63,20 +47,13 @@ export const AuthContextProvider = ({ children }) => {
         username: data.username,
         profileUrl: data.profileUrl,
         userId: data.userId,
-        tokens: data.tokens || [],
       });
     }
   };
 
   const login = async (email, password) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-      await updateTokenData(userCredential.user.uid);
+      await signInWithEmailAndPassword(auth, email, password);
       return { success: true };
     } catch (error) {
       console.log(`Error login`, error);
@@ -114,9 +91,7 @@ export const AuthContextProvider = ({ children }) => {
         username,
         profileUrl,
         userId: response?.user?.uid,
-        tokens: [],
       });
-      await updateTokenData(response.user.uid);
       return { success: true, data: response?.user };
     } catch (error) {
       console.log(`Error register`, error);

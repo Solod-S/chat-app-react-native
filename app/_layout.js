@@ -1,13 +1,13 @@
+import "../global.css";
 import { View, Text } from "react-native";
 import { Slot, useRouter, useSegments } from "expo-router";
 import { AuthContextProvider, useAuth } from "@/context/authContext";
-// Import your global CSS file
-import "../global.css";
 import { useEffect } from "react";
 import { MenuProvider } from "react-native-popup-menu";
+import * as Notifications from "expo-notifications";
 
 const MainLayout = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
@@ -26,6 +26,24 @@ const MainLayout = () => {
       router.replace("signIn");
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    // Обработчик взаимодействия с уведомлением
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      response => {
+        const { data } = response.notification.request.content;
+
+        if (data?.screen === "chatRoom" && data?.item) {
+          router.push({
+            pathname: "/chatRoom",
+            params: data.item, // Передача параметров в роутер
+          });
+        }
+      }
+    );
+
+    return () => subscription.remove();
+  }, []);
 
   return (
     <View className="flex-1 bg-white">

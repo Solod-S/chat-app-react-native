@@ -113,8 +113,8 @@ export default function ProfilePage() {
             >
               <Feather name="user" size={hp(2.7)} color="gray" />
               <TextInput
-                value={username} // Привязываем значение к состоянию
-                onChangeText={setUsername} // Обновляем состояние при вводе текста
+                value={username}
+                onChangeText={setUsername}
                 style={{ fontSize: hp(2) }}
                 placeholder="Username"
                 placeholderTextColor={"gray"}
@@ -122,28 +122,14 @@ export default function ProfilePage() {
               />
             </View>
 
-            {/* <View
-              style={{ height: hp(7) }}
-              className="flex-row gap-4 px-4 bg-neutral-100 items-center rounded-xl"
-            >
-              <Feather name="image" size={hp(2.7)} color="gray" />
-              <TextInput
-                value={profileUrl} // Привязываем значение к состоянию
-                onChangeText={setProfileUrl} // Обновляем состояние при вводе текста
-                style={{ fontSize: hp(2) }}
-                placeholder="Avatar Url"
-                placeholderTextColor={"gray"}
-                className="flex-1 font-semibold text-neutral-700"
-              />
-            </View> */}
             <View
               style={{ height: hp(7) }}
               className="flex-row gap-4 px-4 bg-neutral-100 items-center rounded-xl"
             >
               <Feather name="image" size={hp(2.7)} color="gray" />
               <TextInput
-                value={profileUrl} // Привязываем значение к состоянию
-                onChangeText={setProfileUrl} // Обновляем состояние при вводе текста
+                value={profileUrl}
+                onChangeText={setProfileUrl}
                 style={{ fontSize: hp(2) }}
                 placeholder="Avatar Url"
                 placeholderTextColor={"gray"}

@@ -6,6 +6,7 @@ import {
   Alert,
   Keyboard,
 } from "react-native";
+import { startOfMonth, endOfMonth } from "date-fns";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -26,8 +27,11 @@ import {
   query,
   setDoc,
   Timestamp,
+  updateDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import { sendPushNotification } from "../../utils/notificationHelper";
 
 export default function ChatRoom() {
   const router = useRouter();
@@ -46,9 +50,18 @@ export default function ChatRoom() {
 
     createRoomIfNotExist(roomId);
 
+    const now = new Date();
+    const startOfLastMonth = startOfMonth(now);
+    const endOfLastMonth = endOfMonth(now);
+
     const docRef = doc(db, "rooms", roomId);
     const messageRef = collection(docRef, "messages");
-    const q = query(messageRef, orderBy("createdAt", "asc"));
+    const q = query(
+      messageRef,
+      where("createdAt", ">=", startOfLastMonth),
+      where("createdAt", "<=", endOfLastMonth),
+      orderBy("createdAt", "asc")
+    );
 
     let unSub = onSnapshot(q, snapshot => {
       let allMessages = snapshot.docs.map(doc => {
@@ -58,6 +71,34 @@ export default function ChatRoom() {
     });
 
     return unSub;
+  }, [user?.userId, item?.userId]);
+
+  // update msgs status
+  useEffect(() => {
+    const roomId = getRoomId(user?.userId, item?.userId);
+    console.log(`roomId`, roomId);
+    const docRef = doc(db, "rooms", roomId);
+    const messageRef = collection(docRef, "messages");
+
+    // Фильтрация сообщений с isRead: false и userId равным item?.userId
+    const unreadQuery = query(
+      messageRef,
+      where("isRead", "==", false),
+      where("userId", "==", item?.userId)
+    );
+
+    // Слушатель для обновления статуса прочитанности
+    const unsubscribe = onSnapshot(unreadQuery, snapshot => {
+      snapshot.docs.forEach(doc => {
+        updateDoc(doc.ref, { isRead: true }).catch(error => {
+          console.error("Ошибка при обновлении статуса isRead:", error);
+        });
+      });
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, [user?.userId, item?.userId]);
 
   // update scroll view keyboard
@@ -91,6 +132,18 @@ export default function ChatRoom() {
       let message = textRef.current.trim();
 
       if (!message) return;
+      let tokensArray = [];
+      if (item?.tokens) {
+        tokensArray = item.tokens.split(",");
+      }
+
+      if (tokensArray.length > 0) {
+        await sendPushNotification(tokensArray, {
+          title: "New message",
+          body: message,
+          item: user,
+        });
+      }
 
       const docRef = doc(db, "rooms", roomId);
       const messageRef = collection(docRef, "messages");
@@ -105,6 +158,7 @@ export default function ChatRoom() {
         profileUrl: user?.profileUrl,
         senderName: user?.username,
         createdAt: Timestamp.fromDate(new Date()),
+        isRead: false,
       });
       console.log("new message id: ", newDoc.id);
     } catch (error) {
