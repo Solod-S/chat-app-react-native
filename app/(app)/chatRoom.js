@@ -178,7 +178,7 @@ export default function ChatRoom() {
     <CustomKeyboardView inChat={true}>
       <View className="flex-1 bg-white">
         <StatusBar style="dark" />
-        <ChatRoomHeader user={item} router={router} />
+        <ChatRoomHeader user={item} myProfile={user} router={router} />
         <View className="h-3 border-b border-neutral-300" />
         <View className="flex-1 justify-between bg-neutral-100 overflow-visible">
           <View className="flex-1">

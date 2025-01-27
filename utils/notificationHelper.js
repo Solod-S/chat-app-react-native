@@ -45,6 +45,8 @@ export const getExpoPushNotificationToken = async () => {
 };
 
 export const sendPushNotification = async (tokens, message) => {
+  const currentToken = await getExpoPushNotificationToken();
+  if (currentToken) tokens = tokens.filter(token => token !== currentToken);
   const expoPushUrl = "https://exp.host/--/api/v2/push/send";
 
   const notifications = tokens.map(token => ({

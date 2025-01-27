@@ -19,6 +19,7 @@ import { CustomKeyboardView, Loading } from "../../components";
 import { Feather } from "@expo/vector-icons";
 import Anticons from "react-native-vector-icons/Ionicons";
 import { useAuth } from "../../context/authContext";
+import Toast from "react-native-toast-message";
 
 export default function ProfilePage() {
   const { updateUserInfo } = useAuth();
@@ -64,7 +65,15 @@ export default function ProfilePage() {
     if (!response.success) {
       Alert.alert("Profile Page", response.message);
     } else {
-      Alert.alert("Success", "Your profile has been updated successfully!");
+      Toast.show({
+        type: "success",
+        position: "top",
+        text1: "Your profile has been updated successfully!",
+        // text2: "You have successfully removed this user from your friends.",
+        visibilityTime: 1000,
+        autoHide: true,
+        bottomOffset: 50,
+      });
     }
   };
 
@@ -73,14 +82,20 @@ export default function ProfilePage() {
       <StatusBar style="dark" />
       <View
         style={{ paddingTop: hp(5), paddingHorizontal: wp(5) }}
-        className="flex-1  gap-8 "
+        className="flex-1 fle  gap-8 "
       >
         <TouchableOpacity
           onPress={() => router.back()}
-          className="ml-auto"
-          style={{ opacity: 0.8 }}
+          className=" flex-row items-center gap-1 "
+          style={{ opacity: 0.8, flexDirection: "row" }}
         >
           <Anticons name="caret-back-circle" size={hp(4.5)} color="#6366F1" />
+          <Text
+            style={{ fontSize: hp(1.7) }}
+            className="text-base font-semibold tracking-wider"
+          >
+            BACK
+          </Text>
         </TouchableOpacity>
         <View className="flex-1 justify-center items-center ">
           <View

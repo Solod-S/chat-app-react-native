@@ -1,5 +1,6 @@
 import "../global.css";
-import { View, Text } from "react-native";
+import Toast from "react-native-toast-message";
+import { View } from "react-native";
 import { Slot, useRouter, useSegments } from "expo-router";
 import { AuthContextProvider, useAuth } from "@/context/authContext";
 import { useEffect } from "react";
@@ -48,6 +49,7 @@ const MainLayout = () => {
   return (
     <View className="flex-1 bg-white">
       <Slot />
+      <Toast />
     </View>
   );
 };

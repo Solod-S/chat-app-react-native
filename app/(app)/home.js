@@ -1,5 +1,11 @@
-import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
-import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  RefreshControl,
+  ActivityIndicator,
+} from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   widthPercentageToDP as wp,
@@ -8,45 +14,95 @@ import {
 
 import { useAuth } from "../../context/authContext";
 import { ChatList, Loading } from "../../components";
-import { getDoc, getDocs, query, where } from "firebase/firestore";
+import { getDocs, query, where, limit, startAfter } from "firebase/firestore";
 import { usersRef } from "../../firebaseConfig";
 
 export default function Home() {
   const { user } = useAuth();
 
-  const [users, setUsers] = useState([1, 2, 3]);
+  const [users, setUsers] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [lastVisible, setLastVisible] = useState(null);
 
+  // Первичная загрузка пользователей
   useEffect(() => {
-    console.log(`current userId: `, user?.userId);
-    if (user?.userId) getUser();
+    if (user?.userId) {
+      getUsers();
+    }
   }, [user]);
 
-  const getUser = async () => {
+  // Получение пользователей (с учетом пагинации)
+  const getUsers = async (isLoadMore = false) => {
     try {
-      const q = query(usersRef, where("userId", "!=", user?.userId));
+      let q;
+      if (isLoadMore && lastVisible) {
+        q = query(
+          usersRef,
+          where("userId", "!=", user?.userId),
+          startAfter(lastVisible),
+          limit(10)
+        );
+      } else {
+        q = query(usersRef, where("userId", "!=", user?.userId), limit(10));
+      }
+
       const querySnapshot = await getDocs(q);
-      // console.log(`querySnapshot`, querySnapshot);
-      let data = [];
+      const data = [];
       querySnapshot.forEach(doc => {
         data.push(doc.data());
       });
 
-      setUsers(data);
+      if (isLoadMore) {
+        setUsers(prevUsers => [...prevUsers, ...data]);
+      } else {
+        setUsers(data);
+      }
+
+      // Обновляем lastVisible только если есть документы
+      if (!querySnapshot.empty) {
+        setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+      }
     } catch (error) {
-      console.log(`Error in getUser: `, error.message);
+      console.error("Error fetching users: ", error.message);
     }
   };
 
+  // Обновление списка (pull-to-refresh)
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await getUsers();
+    setRefreshing(false);
+  }, [user]);
+
+  // Загрузка дополнительных данных (бесконечная прокрутка)
+  const loadMoreUsers = async () => {
+    if (loadingMore || !lastVisible) return;
+    setLoadingMore(true);
+    await getUsers(true);
+    setLoadingMore(false);
+  };
+
   return (
-    <View className="bg-white flex-1 ">
+    <View className="bg-white flex-1 pt-4">
       <StatusBar style="light" />
-      {users?.length > 0 ? (
-        <ChatList currentUser={user} users={users} />
-      ) : (
-        <View className="flex items-center" style={{ top: hp(30) }}>
-          <Loading size={hp(6.5)} />
-        </View>
-      )}
+      <FlatList
+        data={users}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => (
+          <ChatList currentUser={user} users={[item]} />
+        )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        onEndReached={loadMoreUsers}
+        onEndReachedThreshold={0.5}
+        ListEmptyComponent={() => (
+          <View className="flex items-center" style={{ top: hp(30) }}>
+            <Text>No users</Text>
+          </View>
+        )}
+      />
     </View>
   );
 }

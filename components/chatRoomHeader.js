@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import React from "react";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
+import React, { useState } from "react";
 import { Stack } from "expo-router";
 import { Image } from "expo-image";
 import {
@@ -8,10 +8,60 @@ import {
 } from "react-native-responsive-screen";
 
 import Entypo from "@expo/vector-icons/Entypo";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { useAuth } from "@/context/authContext";
+import { Loading } from "./loading";
+import Toast from "react-native-toast-message";
 
-export function ChatRoomHeader({ user, router }) {
+export function ChatRoomHeader({ user, router, myProfile }) {
+  const [loading, setLoading] = useState(false);
+  const { addToFriendsList, removeFromFriendsList } = useAuth();
+
+  const addToFriends = async () => {
+    try {
+      setLoading(true);
+      await addToFriendsList(myProfile.userId, user.userId);
+      Toast.show({
+        type: "success",
+        position: "top",
+        text1: "Friend added successfully",
+        // text2: "You have successfully added this user to your friends.",
+        visibilityTime: 1000,
+        autoHide: true,
+        bottomOffset: 50,
+      });
+    } catch (error) {
+      console.log(`Error in addToFriends :`, error);
+      Alert.alert("Add to friends", "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeFromFriends = async () => {
+    try {
+      setLoading(true);
+      await removeFromFriendsList(myProfile.userId, user.userId);
+      Toast.show({
+        type: "success",
+        position: "top",
+        text1: "Friend removed successfully",
+        // text2: "You have successfully removed this user from your friends.",
+        visibilityTime: 1000,
+        autoHide: true,
+        bottomOffset: 50,
+      });
+    } catch (error) {
+      console.log(`Error in addToFriends :`, error);
+      Alert.alert(
+        "Remove from friends",
+        "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Stack.Screen
       options={{
@@ -38,8 +88,23 @@ export function ChatRoomHeader({ user, router }) {
         ),
         headerRight: () => (
           <View className="flex-row items-center gap-8">
-            <Ionicons name="call-sharp" size={hp(2.8)} color="#737373" />
-            <FontAwesome name="video-camera" size={hp(2.8)} color="#737373" />
+            {loading ? (
+              <Loading size={hp(2.8)} />
+            ) : myProfile?.friends?.includes(user.userId) ? (
+              <AntDesign
+                name="minuscircleo"
+                size={hp(2.8)}
+                color="#737373"
+                onPress={() => removeFromFriends()}
+              />
+            ) : (
+              <AntDesign
+                name="pluscircleo"
+                size={hp(2.8)}
+                color="#737373"
+                onPress={() => addToFriends()}
+              />
+            )}
           </View>
         ),
       }}

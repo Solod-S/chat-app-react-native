@@ -6,7 +6,14 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth, db } from "../firebaseConfig";
-import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { getExpoPushNotificationToken } from "../utils";
 
 const AuthContext = createContext();
@@ -64,7 +71,53 @@ export const AuthContextProvider = ({ children }) => {
         profileUrl: data.profileUrl,
         userId: data.userId,
         tokens: data.tokens || [],
+        friends: data.friends || [],
       });
+    }
+  };
+
+  const addToFriendsList = async (userId, friendId) => {
+    try {
+      const docRef = doc(db, "users", userId);
+      await updateDoc(docRef, {
+        friends: arrayUnion(friendId),
+      });
+
+      const newData = await getDoc(docRef);
+
+      if (newData.exists()) {
+        let data = newData.data();
+
+        setUser(prevUser => ({
+          ...prevUser,
+          friends: data.friends,
+        }));
+      }
+    } catch (error) {
+      console.log(`Error in addToFriendsList :`, error);
+    }
+  };
+
+  const removeFromFriendsList = async (userId, friendId) => {
+    try {
+      const docRef = doc(db, "users", userId);
+
+      await updateDoc(docRef, {
+        friends: arrayRemove(friendId),
+      });
+
+      const newData = await getDoc(docRef);
+
+      if (newData.exists()) {
+        let data = newData.data();
+
+        setUser(prevUser => ({
+          ...prevUser,
+          friends: data.friends,
+        }));
+      }
+    } catch (error) {
+      console.log(`Error in removeFromFriendsList:`, error);
     }
   };
 
@@ -115,6 +168,7 @@ export const AuthContextProvider = ({ children }) => {
         profileUrl,
         userId: response?.user?.uid,
         tokens: [],
+        friends: [],
       });
       await updateTokenData(response.user.uid);
       return { success: true, data: response?.user };
@@ -152,7 +206,16 @@ export const AuthContextProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, login, register, logout, updateUserInfo }}
+      value={{
+        user,
+        isAuthenticated,
+        login,
+        register,
+        logout,
+        updateUserInfo,
+        addToFriendsList,
+        removeFromFriendsList,
+      }}
     >
       {children}
     </AuthContext.Provider>
