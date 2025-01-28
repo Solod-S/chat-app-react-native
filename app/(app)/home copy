@@ -97,36 +97,25 @@ export default function Home() {
         return !messagesSnapshot.empty; // Возвращает true, если есть хотя бы одно сообщение
       };
 
-      // Обработчик для каждой комнаты
-      const processRoom = async doc => {
-        const roomName = doc.data().roomId;
-        const userIds = roomName.split("-");
-
-        console.log("Checking room:", roomName); // Логируем roomId
-
-        // Проверяем, если current user в roomId, либо как первый, либо как второй
-        let otherUserId = null;
-        if (userIds[0] === user.userId) {
-          otherUserId = userIds[1]; // второй пользователь
-        } else if (userIds[1] === user.userId) {
-          otherUserId = userIds[0]; // первый пользователь
-        }
-
-        console.log("otherUserId found:", otherUserId); // Логируем найденного пользователя
-
-        if (otherUserId) {
-          const hasMessages = await checkMessagesInRoom(doc.ref);
-          console.log(`Room ${roomName} has messages:`, hasMessages); // Логируем результат проверки сообщений
-          if (hasMessages) {
-            roomUsersIds.add(otherUserId);
+      // Добавляем пользователей из комнат, где есть подколлекция "messages"
+      const processRooms = async snapshot => {
+        for (const doc of snapshot.docs) {
+          const roomName = doc.data().roomId;
+          const userIds = roomName.split("-");
+          const chatUserId = userIds.find(id => id !== user.userId);
+          if (chatUserId) {
+            const hasMessages = await checkMessagesInRoom(doc.ref);
+            if (hasMessages) {
+              roomUsersIds.add(chatUserId);
+            }
           }
         }
       };
 
       // Обрабатываем обе коллекции комнат
       await Promise.all([
-        ...roomsSnapshot.docs.map(processRoom),
-        ...reverseRoomsSnapshot.docs.map(processRoom),
+        processRooms(roomsSnapshot),
+        processRooms(reverseRoomsSnapshot),
       ]);
 
       // После того как мы собрали все valid chat users, запрашиваем информацию о пользователях

@@ -7,7 +7,7 @@ import {
   Alert,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { db } from "../../firebaseConfig";
 import { getDoc, doc } from "firebase/firestore";
 import {
@@ -17,40 +17,64 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { CustomKeyboardView, Loading } from "../../components";
 import { Feather } from "@expo/vector-icons";
-import Anticons from "react-native-vector-icons/Ionicons";
 import { useAuth } from "../../context/authContext";
 import Toast from "react-native-toast-message";
 
 export default function ProfilePage() {
   const { updateUserInfo } = useAuth();
-  const router = useRouter();
-  const item = useLocalSearchParams();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [profileUrl, setProfileUrl] = useState("");
 
-  useEffect(() => {
-    const getUser = async () => {
-      if (!item?.userId) return;
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     if (!user?.userId) return;
 
-      try {
-        const userDocRef = doc(db, "users", item.userId);
-        const userDoc = await getDoc(userDocRef);
+  //     try {
+  //       const userDocRef = doc(db, "users", user.userId);
+  //       const userDoc = await getDoc(userDocRef);
 
-        if (userDoc.exists()) {
-          const { profileUrl, username } = userDoc.data();
-          setProfileUrl(profileUrl);
-          setUsername(username); //
-        } else {
-          console.log("No such user document!");
+  //       if (userDoc.exists()) {
+  //         const { profileUrl, username } = userDoc.data();
+  //         setProfileUrl(profileUrl);
+  //         setUsername(username); //
+  //       } else {
+  //         console.log("No such user document!");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching user data:", error.message);
+  //     }
+  //   };
+
+  //   getUser();
+  // }, [user?.userId]);
+
+  // Fetch user data when the profile screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      const getUser = async () => {
+        if (!user?.userId) return;
+
+        try {
+          const userDocRef = doc(db, "users", user.userId);
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists()) {
+            const { profileUrl, username } = userDoc.data();
+            setProfileUrl(profileUrl);
+            setUsername(username);
+          } else {
+            console.log("No such user document!");
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error.message);
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error.message);
-      }
-    };
+      };
 
-    getUser();
-  }, [item?.userId]);
+      getUser();
+    }, [user?.userId])
+  );
 
   const handleSave = async () => {
     if (!username) {
@@ -84,19 +108,6 @@ export default function ProfilePage() {
         style={{ paddingTop: hp(5), paddingHorizontal: wp(5) }}
         className="flex-1 fle  gap-8 "
       >
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className=" flex-row items-center gap-1 "
-          style={{ opacity: 0.8, flexDirection: "row" }}
-        >
-          <Anticons name="caret-back-circle" size={hp(4.5)} color="#6366F1" />
-          <Text
-            style={{ fontSize: hp(1.7) }}
-            className="text-base font-semibold tracking-wider"
-          >
-            BACK
-          </Text>
-        </TouchableOpacity>
         <View className="flex-1 justify-center items-center ">
           <View
             style={{

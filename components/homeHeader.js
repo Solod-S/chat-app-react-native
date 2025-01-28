@@ -27,7 +27,7 @@ export function HomeHeader() {
   const { top } = useSafeAreaInsets();
 
   const handleProfile = () => {
-    router.push({ pathname: "/profilePage", params: user });
+    router.push({ pathname: "/profilePage" });
   };
 
   const handleLogOut = async () => {

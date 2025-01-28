@@ -21,7 +21,7 @@ export function ChatItem({ currentUser, item, index, router, noBorder }) {
   const [lastMessage, setLastMessage] = useState(undefined);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const openChatRoom = () => {
-    router.push({ pathname: "/chatRoom", params: item });
+    router.push({ pathname: "/screens/chatRoom", params: item });
   };
 
   // get last msgs

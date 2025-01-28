@@ -1,7 +1,7 @@
 import "../global.css";
 import Toast from "react-native-toast-message";
 import { View } from "react-native";
-import { Slot, useRouter, useSegments } from "expo-router";
+import { Slot, Stack, useRouter, useSegments } from "expo-router";
 import { AuthContextProvider, useAuth } from "@/context/authContext";
 import { useEffect } from "react";
 import { MenuProvider } from "react-native-popup-menu";
@@ -36,7 +36,7 @@ const MainLayout = () => {
 
         if (data?.screen === "chatRoom" && data?.item) {
           router.push({
-            pathname: "/chatRoom",
+            pathname: "/screens/chatRoom",
             params: data.item, // Передача параметров в роутер
           });
         }
@@ -48,7 +48,18 @@ const MainLayout = () => {
 
   return (
     <View className="flex-1 bg-white">
-      <Slot />
+      {/* <Slot />
+       */}
+      <Stack
+      // screenOptions={{
+      //   headerShown: false,
+      // }}
+      >
+        <Stack.Screen name="(app)" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/chatRoom" />
+        <Stack.Screen name="signIn" options={{ headerShown: false }} />
+        <Stack.Screen name="signUp" options={{ headerShown: false }} />
+      </Stack>
       <Toast />
     </View>
   );

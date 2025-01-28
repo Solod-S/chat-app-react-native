@@ -27,6 +27,7 @@ export const AuthContextProvider = ({ children }) => {
     const unSub = onAuthStateChanged(auth, user => {
       try {
         if (user) {
+          console.log(`!!user`, user);
           seIsAuthenticated(true);
           setUser(user);
           updateUserData(user.uid);
@@ -165,6 +166,7 @@ export const AuthContextProvider = ({ children }) => {
 
       await setDoc(doc(db, "users", response?.user?.uid), {
         username,
+        usernameLower: username.toLowerCase(),
         profileUrl,
         userId: response?.user?.uid,
         tokens: [],
@@ -189,12 +191,15 @@ export const AuthContextProvider = ({ children }) => {
       await updateDoc(userDocRef, {
         username: username,
         profileUrl: profileUrl,
+        usernameLower: username.toLowerCase(),
       });
 
       setUser(prevUser => ({
         ...prevUser,
         username: username || prevUser.username,
         profileUrl: profileUrl || prevUser.profileUrl,
+        usernameLower:
+          username.toLowerCase() || prevUser.username.toLowerCase(),
       }));
 
       return { success: true };

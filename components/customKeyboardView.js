@@ -1,5 +1,4 @@
 import { ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { useHeaderHeight } from "@react-navigation/elements";
 import React from "react";
 
 const ios = Platform.OS == "ios";
