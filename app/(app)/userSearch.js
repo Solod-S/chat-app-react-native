@@ -71,19 +71,19 @@ export default function UserSearch() {
       setLoading(true);
 
       const normalizedSearch = searchQuery.trim().toLowerCase();
-
+      console.log(`normalizedSearch`, normalizedSearch);
       let q = query(
         usersRef,
-        where("userId", "!=", user?.userId),
-        where("usernameLower", ">=", normalizedSearch),
-        where("usernameLower", "<=", normalizedSearch + "\uf8ff") // Firestore range query
+        where("userId", "!=", user?.uid),
+        where("usernameLower", ">=", normalizedSearch)
+        // where("usernameLower", "<=", normalizedSearch + "\uf8ff") // Firestore range query
       );
 
       const querySnapshot = await getDocs(q);
       const data = querySnapshot.docs.map(doc => doc.data());
       setUsers(data);
     } catch (error) {
-      console.error("Error fetching users: ", error.message);
+      console.error("Error getting users: ", error.message);
       Toast.show({
         type: "error",
         position: "top",

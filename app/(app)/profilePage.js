@@ -54,10 +54,10 @@ export default function ProfilePage() {
   useFocusEffect(
     React.useCallback(() => {
       const getUser = async () => {
-        if (!user?.userId) return;
+        if (!user?.uid) return;
 
         try {
-          const userDocRef = doc(db, "users", user.userId);
+          const userDocRef = doc(db, "users", user?.uid);
           const userDoc = await getDoc(userDocRef);
 
           if (userDoc.exists()) {

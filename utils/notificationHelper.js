@@ -69,35 +69,6 @@ export const sendPushNotification = async (tokens, message) => {
   }
 };
 
-// export const sendPushNotification = async (tokens, message) => {
-//   const currentToken = await getExpoPushNotificationToken();
-
-//   if (currentToken) tokens = tokens.filter(token => token !== currentToken);
-
-//   const expoPushUrl = "https://exp.host/--/api/v2/push/send";
-//   console.log(`tokens!`, tokens);
-//   // Создаем массив сообщений для каждого токена
-//   const notifications = tokens.map(token => ({
-//     to: token,
-//     sound: "default",
-//     title: message.title || "Уведомление",
-//     body: message.body || "Это ваше сообщение",
-//     data: message.data || {},
-//   }));
-
-//   try {
-//     const response = await axios.post(expoPushUrl, notifications, {
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//     });
-
-//     // console.log("Ответ сервиса Expo:", response.data);
-//   } catch (error) {
-//     console.error("Ошибка отправки уведомления:", error);
-//   }
-// };
-
 // Пример вызова функции
 // const tokens = [
 //   "ExponentPushToken[aWhdZqE-HdNZe9E1yjEbQ8]", // Добавьте больше токенов

@@ -20,7 +20,7 @@ export function ChatRoomHeader({ user, router, myProfile }) {
   const addToFriends = async () => {
     try {
       setLoading(true);
-      await addToFriendsList(myProfile.userId, user.userId);
+      await addToFriendsList(myProfile.userId, user.uid);
       Toast.show({
         type: "success",
         position: "top",
@@ -41,7 +41,7 @@ export function ChatRoomHeader({ user, router, myProfile }) {
   const removeFromFriends = async () => {
     try {
       setLoading(true);
-      await removeFromFriendsList(myProfile.userId, user.userId);
+      await removeFromFriendsList(myProfile.userId, user.uid);
       Toast.show({
         type: "success",
         position: "top",
@@ -90,7 +90,7 @@ export function ChatRoomHeader({ user, router, myProfile }) {
           <View className="flex-row items-center gap-8">
             {loading ? (
               <Loading size={hp(2.8)} />
-            ) : myProfile?.friends?.includes(user.userId) ? (
+            ) : myProfile?.friends?.includes(user.uid) ? (
               <AntDesign
                 name="minuscircleo"
                 size={hp(2.8)}

@@ -6,7 +6,15 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth, db } from "../firebaseConfig";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { getExpoPushNotificationToken } from "../utils";
 
 const AuthContext = createContext();
 
@@ -18,7 +26,6 @@ export const AuthContextProvider = ({ children }) => {
   useEffect(() => {
     const unSub = onAuthStateChanged(auth, user => {
       try {
-        // console.log("Auth state changed for:", user?.email);
         if (user) {
           seIsAuthenticated(true);
           setUser(user);
@@ -37,6 +44,22 @@ export const AuthContextProvider = ({ children }) => {
     return unSub;
   }, []);
 
+  const updateTokenData = async id => {
+    try {
+      const token = await getExpoPushNotificationToken();
+      if (!token) return;
+
+      const docRef = doc(db, "users", id);
+      await updateDoc(docRef, {
+        tokens: arrayUnion(token),
+      });
+
+      await getDoc(docRef);
+    } catch (error) {
+      console.log(`Error in updateTokenData :`, error);
+    }
+  };
+
   const updateUserData = async id => {
     const docRef = doc(db, "users", id);
     const docSnap = await getDoc(docRef);
@@ -47,13 +70,66 @@ export const AuthContextProvider = ({ children }) => {
         username: data.username,
         profileUrl: data.profileUrl,
         userId: data.userId,
+        tokens: data.tokens || [],
+        friends: data.friends || [],
       });
+    }
+  };
+
+  const addToFriendsList = async (userId, friendId) => {
+    try {
+      const docRef = doc(db, "users", userId);
+      await updateDoc(docRef, {
+        friends: arrayUnion(friendId),
+      });
+
+      const newData = await getDoc(docRef);
+
+      if (newData.exists()) {
+        let data = newData.data();
+
+        setUser(prevUser => ({
+          ...prevUser,
+          friends: data.friends,
+        }));
+      }
+    } catch (error) {
+      console.log(`Error in addToFriendsList :`, error);
+    }
+  };
+
+  const removeFromFriendsList = async (userId, friendId) => {
+    try {
+      const docRef = doc(db, "users", userId);
+
+      await updateDoc(docRef, {
+        friends: arrayRemove(friendId),
+      });
+
+      const newData = await getDoc(docRef);
+
+      if (newData.exists()) {
+        let data = newData.data();
+
+        setUser(prevUser => ({
+          ...prevUser,
+          friends: data.friends,
+        }));
+      }
+    } catch (error) {
+      console.log(`Error in removeFromFriendsList:`, error);
     }
   };
 
   const login = async (email, password) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      await updateTokenData(userCredential.user.uid);
       return { success: true };
     } catch (error) {
       console.log(`Error login`, error);
@@ -67,6 +143,10 @@ export const AuthContextProvider = ({ children }) => {
 
   const logout = async () => {
     try {
+      const token = await getExpoPushNotificationToken();
+      if (token) {
+        await removeTokenData(user.userId, token);
+      }
       await signOut(auth);
       return { success: true };
     } catch (error) {
@@ -89,9 +169,13 @@ export const AuthContextProvider = ({ children }) => {
 
       await setDoc(doc(db, "users", response?.user?.uid), {
         username,
+        usernameLower: username.toLowerCase(),
         profileUrl,
         userId: response?.user?.uid,
+        tokens: [],
+        friends: [],
       });
+      await updateTokenData(response.user.uid);
       return { success: true, data: response?.user };
     } catch (error) {
       console.log(`Error register`, error);
@@ -110,12 +194,15 @@ export const AuthContextProvider = ({ children }) => {
       await updateDoc(userDocRef, {
         username: username,
         profileUrl: profileUrl,
+        usernameLower: username.toLowerCase(),
       });
 
       setUser(prevUser => ({
         ...prevUser,
         username: username || prevUser.username,
         profileUrl: profileUrl || prevUser.profileUrl,
+        usernameLower:
+          username.toLowerCase() || prevUser.username.toLowerCase(),
       }));
 
       return { success: true };
@@ -125,9 +212,35 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  const refresh = () => {
+    setUser(prevState => ({ ...prevState }));
+  };
+
+  const removeTokenData = async (id, token) => {
+    try {
+      const docRef = doc(db, "users", id);
+      await updateDoc(docRef, {
+        tokens: arrayRemove(token),
+      });
+    } catch (error) {
+      console.log(`Error in removeTokenData:`, error);
+    }
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, login, register, logout, updateUserInfo }}
+      value={{
+        user,
+        isAuthenticated,
+        login,
+        register,
+        logout,
+        updateUserInfo,
+        updateUserData,
+        addToFriendsList,
+        removeFromFriendsList,
+        refresh,
+      }}
     >
       {children}
     </AuthContext.Provider>

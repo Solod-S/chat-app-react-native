@@ -27,10 +27,14 @@ export const AuthContextProvider = ({ children }) => {
     const unSub = onAuthStateChanged(auth, user => {
       try {
         if (user) {
-          console.log(`!!user`, user);
           seIsAuthenticated(true);
+
           setUser(user);
-          updateUserData(user.uid);
+          console.log(`user`, user);
+          // updateUserData(user.uid);
+          setTimeout(() => {
+            updateUserData(user);
+          }, 1000);
         } else {
           seIsAuthenticated(false);
           setUser(null);
@@ -61,19 +65,21 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  const updateUserData = async id => {
-    const docRef = doc(db, "users", id);
+  const updateUserData = async user => {
+    const docRef = doc(db, "users", user.uid);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       let data = docSnap.data();
-      setUser({
+      const finalData = {
         ...user,
         username: data.username,
         profileUrl: data.profileUrl,
-        userId: data.userId,
         tokens: data.tokens || [],
         friends: data.friends || [],
-      });
+      };
+
+      console.log(`finalData`, finalData);
+      setUser(finalData);
     }
   };
 
@@ -144,6 +150,10 @@ export const AuthContextProvider = ({ children }) => {
 
   const logout = async () => {
     try {
+      const token = await getExpoPushNotificationToken();
+      if (token) {
+        await removeTokenData(user.uid, token);
+      }
       await signOut(auth);
       return { success: true };
     } catch (error) {
@@ -209,6 +219,21 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  const refresh = () => {
+    setUser(prevState => ({ ...prevState }));
+  };
+
+  const removeTokenData = async (id, token) => {
+    try {
+      const docRef = doc(db, "users", id);
+      await updateDoc(docRef, {
+        tokens: arrayRemove(token),
+      });
+    } catch (error) {
+      console.log(`Error in removeTokenData:`, error);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -218,8 +243,10 @@ export const AuthContextProvider = ({ children }) => {
         register,
         logout,
         updateUserInfo,
+        updateUserData,
         addToFriendsList,
         removeFromFriendsList,
+        refresh,
       }}
     >
       {children}

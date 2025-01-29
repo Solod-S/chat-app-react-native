@@ -1,62 +1,109 @@
 import "../global.css";
 import Toast from "react-native-toast-message";
 import { View } from "react-native";
-import { Slot, Stack, useRouter, useSegments } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import { AuthContextProvider, useAuth } from "@/context/authContext";
 import { useEffect } from "react";
 import { MenuProvider } from "react-native-popup-menu";
 import * as Notifications from "expo-notifications";
 
 const MainLayout = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, refresh } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
-    //  check if the user is authenticated or not
-    if (typeof isAuthenticated == "undefined") return;
-    // user in app group
-    const inApp = segments[0] == "(app)";
+    // Проверяем авторизацию и перенаправляем пользователя
+    if (typeof isAuthenticated === "undefined") return;
+    const inApp = segments[0] === "(app)";
     if (isAuthenticated && !inApp) {
-      // if user authenticated
-      // and not in (app) => redirect home
       router.replace("home");
-    } else if (isAuthenticated == false) {
-      // if user is not authenticated
-      //  redirect to signIn
+    } else if (!isAuthenticated) {
       router.replace("signIn");
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    // Обработчик взаимодействия с уведомлением
-    const subscription = Notifications.addNotificationResponseReceivedListener(
-      response => {
-        const { data } = response.notification.request.content;
+    // Переменные для хранения подписок на уведомления
+    let subscription;
+    let receivedSubscription;
 
-        if (data?.screen === "chatRoom" && data?.item) {
-          router.push({
-            pathname: "/screens/chatRoom",
-            params: data.item, // Передача параметров в роутер
-          });
+    // Если пользователь авторизован, включаем уведомления
+    if (isAuthenticated) {
+      subscription = Notifications.addNotificationResponseReceivedListener(
+        response => {
+          const { data } = response.notification.request.content;
+          if (data?.screen === "chatRoom" && data?.item) {
+            router.push({
+              pathname: "/screens/chatRoom",
+              params: data.item, // Передача параметров в роутер
+            });
+          }
         }
-      }
-    );
+      );
 
-    return () => subscription.remove();
-  }, []);
+      receivedSubscription = Notifications.addNotificationReceivedListener(
+        notification => {
+          const { data } = notification.request.content;
+
+          if (data?.screen === "chatRoom" && data?.item?.userId) {
+            refresh(); // Делаем рефреш и oбновляем список пользователей
+          }
+        }
+      );
+    }
+
+    // Если пользователь не авторизован, удаляем подписки
+    return () => {
+      if (subscription) subscription.remove();
+      if (receivedSubscription) receivedSubscription.remove();
+    };
+  }, [isAuthenticated]);
+
+  // Устанавливаем обработчик уведомлений
+  useEffect(() => {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => {
+        if (!isAuthenticated) {
+          console.log("Пользователь не авторизован, не показываем уведомление");
+          return {
+            shouldShowAlert: false,
+            shouldPlaySound: false,
+            shouldSetBadge: false,
+          };
+        }
+
+        console.log("Пользователь авторизован, показываем уведомление");
+        return {
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: true,
+        };
+      },
+    });
+  }, [isAuthenticated]);
+
+  // // Регистрация токена для авторизованных пользователей
+  // useEffect(() => {
+  //   const registerNotifications = async () => {
+  //     if (isAuthenticated) {
+  //       const token = await getExpoPushNotificationToken();
+  //       if (token) {
+  //         console.log("Notification token:", token);
+  //         // Здесь можно отправить токен на ваш сервер
+  //       }
+  //     }
+  //   };
+
+  //   registerNotifications();
+  // }, [isAuthenticated]);
 
   return (
     <View className="flex-1 bg-white">
-      {/* <Slot />
-       */}
-      <Stack
-      // screenOptions={{
-      //   headerShown: false,
-      // }}
-      >
+      <Stack>
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
         <Stack.Screen name="screens/chatRoom" />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="signIn" options={{ headerShown: false }} />
         <Stack.Screen name="signUp" options={{ headerShown: false }} />
       </Stack>

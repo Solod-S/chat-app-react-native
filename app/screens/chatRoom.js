@@ -35,7 +35,7 @@ import { sendPushNotification } from "../../utils/notificationHelper";
 
 export default function ChatRoom() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, refresh } = useAuth();
   const item = useLocalSearchParams();
   const scrollViewRef = useRef(null);
   const textRef = useRef("");
@@ -76,7 +76,7 @@ export default function ChatRoom() {
   // update msgs status
   useEffect(() => {
     const roomId = getRoomId(user?.userId, item?.userId);
-    console.log(`roomId`, roomId);
+
     const docRef = doc(db, "rooms", roomId);
     const messageRef = collection(docRef, "messages");
 
@@ -120,6 +120,7 @@ export default function ChatRoom() {
     try {
       await setDoc(doc(db, "rooms", roomId), {
         roomId,
+        participants: roomId.split("-"),
         createdAt: Timestamp.fromDate(new Date()),
       });
     } catch (error) {
@@ -161,6 +162,7 @@ export default function ChatRoom() {
         isRead: false,
       });
       console.log("new message id: ", newDoc.id);
+      refresh();
     } catch (error) {
       console.log(`Error in handleSendMessage: `, error);
       Alert.alert("Message", error.message);
