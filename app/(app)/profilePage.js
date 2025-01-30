@@ -29,10 +29,10 @@ export default function ProfilePage() {
 
   // useEffect(() => {
   //   const getUser = async () => {
-  //     if (!user?.userId) return;
+  //     if (!user?.uid) return;
 
   //     try {
-  //       const userDocRef = doc(db, "users", user.userId);
+  //       const userDocRef = doc(db, "users", user.uid);
   //       const userDoc = await getDoc(userDocRef);
 
   //       if (userDoc.exists()) {
@@ -48,7 +48,7 @@ export default function ProfilePage() {
   //   };
 
   //   getUser();
-  // }, [user?.userId]);
+  // }, [user?.uid]);
 
   // Fetch user data when the profile screen is focused
   useFocusEffect(
@@ -73,7 +73,7 @@ export default function ProfilePage() {
       };
 
       getUser();
-    }, [user?.userId])
+    }, [user?.uid])
   );
 
   const handleSave = async () => {

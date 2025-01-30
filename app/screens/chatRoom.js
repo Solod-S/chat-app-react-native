@@ -32,11 +32,13 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { sendPushNotification } from "../../utils/notificationHelper";
+import { createRoomIfNotExist } from "../../utils";
 
 export default function ChatRoom() {
   const router = useRouter();
   const { user, refresh } = useAuth();
   const item = useLocalSearchParams();
+
   const scrollViewRef = useRef(null);
   const textRef = useRef("");
   const inputRef = useRef(null);
@@ -45,7 +47,7 @@ export default function ChatRoom() {
 
   // get room msgs
   useEffect(() => {
-    const roomId = getRoomId(user?.userId, item?.userId);
+    const roomId = getRoomId(user?.uid, item?.userId);
     setRoomId(roomId);
 
     createRoomIfNotExist(roomId);
@@ -71,11 +73,11 @@ export default function ChatRoom() {
     });
 
     return unSub;
-  }, [user?.userId, item?.userId]);
+  }, [user?.uid, item?.userId]);
 
   // update msgs status
   useEffect(() => {
-    const roomId = getRoomId(user?.userId, item?.userId);
+    const roomId = getRoomId(user?.uid, item?.userId);
 
     const docRef = doc(db, "rooms", roomId);
     const messageRef = collection(docRef, "messages");
@@ -116,17 +118,6 @@ export default function ChatRoom() {
   useEffect(() => {
     updateScrollView();
   }, [messages]);
-  const createRoomIfNotExist = async roomId => {
-    try {
-      await setDoc(doc(db, "rooms", roomId), {
-        roomId,
-        participants: roomId.split("-"),
-        createdAt: Timestamp.fromDate(new Date()),
-      });
-    } catch (error) {
-      console.log(`Error in createRoomIfNotExist: `, error);
-    }
-  };
 
   const handleSendMessage = async () => {
     try {
@@ -140,9 +131,15 @@ export default function ChatRoom() {
 
       if (tokensArray.length > 0) {
         await sendPushNotification(tokensArray, {
-          title: "New message",
+          title: user.username,
           body: message,
-          item: user,
+          item: {
+            username: user.username,
+            userId: user.uid,
+            tokens: user.tokens,
+            profileUrl: user.profileUrl,
+            email: user.email,
+          },
         });
       }
 
@@ -154,14 +151,14 @@ export default function ChatRoom() {
       if (inputRef) inputRef?.current?.clear();
 
       const newDoc = await addDoc(messageRef, {
-        userId: user?.userId,
+        userId: user?.uid,
         text: message,
         profileUrl: user?.profileUrl,
         senderName: user?.username,
         createdAt: Timestamp.fromDate(new Date()),
         isRead: false,
       });
-      console.log("new message id: ", newDoc.id);
+      // console.log("new message id: ", newDoc.id);
       refresh();
     } catch (error) {
       console.log(`Error in handleSendMessage: `, error);
@@ -180,7 +177,12 @@ export default function ChatRoom() {
     <CustomKeyboardView inChat={true}>
       <View className="flex-1 bg-white">
         <StatusBar style="dark" />
-        <ChatRoomHeader user={item} myProfile={user} router={router} />
+        <ChatRoomHeader
+          user={item}
+          myProfile={user}
+          router={router}
+          roomId={roomId}
+        />
         <View className="h-3 border-b border-neutral-300" />
         <View className="flex-1 justify-between bg-neutral-100 overflow-visible">
           <View className="flex-1">

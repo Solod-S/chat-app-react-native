@@ -30,7 +30,7 @@ export const AuthContextProvider = ({ children }) => {
           seIsAuthenticated(true);
 
           setUser(user);
-          console.log(`user`, user);
+
           // updateUserData(user.uid);
           setTimeout(() => {
             updateUserData(user);
@@ -52,6 +52,7 @@ export const AuthContextProvider = ({ children }) => {
   const updateTokenData = async id => {
     try {
       const token = await getExpoPushNotificationToken();
+
       if (!token) return;
 
       const docRef = doc(db, "users", id);
@@ -78,7 +79,6 @@ export const AuthContextProvider = ({ children }) => {
         friends: data.friends || [],
       };
 
-      console.log(`finalData`, finalData);
       setUser(finalData);
     }
   };
@@ -106,6 +106,29 @@ export const AuthContextProvider = ({ children }) => {
   };
 
   const removeFromFriendsList = async (userId, friendId) => {
+    try {
+      const docRef = doc(db, "users", userId);
+
+      await updateDoc(docRef, {
+        friends: arrayRemove(friendId),
+      });
+
+      const newData = await getDoc(docRef);
+
+      if (newData.exists()) {
+        let data = newData.data();
+
+        setUser(prevUser => ({
+          ...prevUser,
+          friends: data.friends,
+        }));
+      }
+    } catch (error) {
+      console.log(`Error in removeFromFriendsList:`, error);
+    }
+  };
+
+  const deleteChatItem = async (userId, friendId) => {
     try {
       const docRef = doc(db, "users", userId);
 

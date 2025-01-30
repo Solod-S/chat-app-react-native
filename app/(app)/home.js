@@ -5,22 +5,19 @@ import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import uniqBy from "lodash.uniqby";
 import { useAuth } from "../../context/authContext";
 import { ChatList } from "../../components";
-import { getDocs, query, where, limit, collection } from "firebase/firestore";
+import { getDocs, query, where, collection } from "firebase/firestore";
 import { usersRef, roomsRef } from "../../firebaseConfig";
-import * as Notifications from "expo-notifications";
 
 export default function Home() {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Первичная загрузка пользователей и обновление в реальном времени
   useEffect(() => {
     let interval;
 
-    if (user?.userId) {
+    if (user?.uid) {
       getUsers();
-
       interval = setInterval(() => {
         getUsers();
       }, 15000);
@@ -28,18 +25,16 @@ export default function Home() {
 
     return () => {
       if (interval) clearInterval(interval);
-      // console.log("Interval cleared");
     };
   }, [user]);
 
   const getUsers = async () => {
     try {
-      if (!user?.userId) return;
+      if (!user?.uid) return;
 
-      const friendUsers = []; // Пользователи из списка друзей
-      const chatUsers = []; // Пользователи из чатов
+      const friendUsers = [];
+      const chatUsers = [];
 
-      // Шаг 1: Получаем пользователей из списка друзей
       if (user.friends && user.friends.length > 0) {
         const friendsQuery = query(
           usersRef,
@@ -55,7 +50,7 @@ export default function Home() {
           }))
         );
       }
-      // Шаг 2: Получаем чаты
+
       const roomsQuery = query(
         roomsRef,
         where("participants", "array-contains", user.uid)
@@ -64,43 +59,28 @@ export default function Home() {
       const roomsSnapshot = await getDocs(roomsQuery);
       const roomUsersIds = new Set();
 
-      // Функция для проверки наличия сообщений в комнате
       const checkMessagesInRoom = async roomRef => {
         const messagesCollectionRef = collection(roomRef, "messages");
         const messagesSnapshot = await getDocs(messagesCollectionRef);
-        return !messagesSnapshot.empty; // Возвращает true, если есть хотя бы одно сообщение
+        return !messagesSnapshot.empty;
       };
 
-      // Обработчик для каждой комнаты
       const processRoom = async doc => {
         const roomName = doc.data().roomId;
         const userIds = roomName.split("-");
 
-        // console.log("Checking room:", roomName);
-
-        // Проверяем, если current user в roomId, либо как первый, либо как второй
-        let otherUserId = null;
-        if (userIds[0] === user.uid) {
-          otherUserId = userIds[1]; // второй пользователь
-        } else if (userIds[1] === user.uid) {
-          otherUserId = userIds[0]; // первый пользователь
-        }
-
-        // console.log("otherUserId found:", otherUserId);
+        let otherUserId = userIds[0] === user.uid ? userIds[1] : userIds[0];
 
         if (otherUserId) {
           const hasMessages = await checkMessagesInRoom(doc.ref);
-          // console.log(`Room ${roomName} has messages:`, hasMessages);
           if (hasMessages) {
             roomUsersIds.add(otherUserId);
           }
         }
       };
 
-      // Обрабатываем коллекции комнат
-      await Promise.all([...roomsSnapshot.docs.map(processRoom)]);
+      await Promise.all(roomsSnapshot.docs.map(processRoom));
 
-      // После того как мы собрали все valid chat users, запрашиваем информацию о пользователях
       if (roomUsersIds.size > 0) {
         const chatUsersQuery = query(
           usersRef,
@@ -116,15 +96,17 @@ export default function Home() {
         );
       }
 
-      // Шаг 3: Создаем уникальный массив пользователей
       const allUsers = uniqBy([...friendUsers, ...chatUsers], "userId");
+
+      // Сортировка: сначала "friend", потом "chat"
+      allUsers.sort((a, b) => (a.type === "friend" ? -1 : 1));
+
       setUsers(allUsers);
     } catch (error) {
       console.error("Error fetching users: ", error.message);
     }
   };
 
-  // Обновление списка (pull-to-refresh)
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await getUsers();
@@ -137,8 +119,17 @@ export default function Home() {
       <FlatList
         data={users}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <ChatList currentUser={user} users={[item]} />
+        renderItem={({ item, index }) => (
+          <View>
+            {(index === 0 || users[index - 1]?.type !== item.type) && (
+              <Text className="text-lg font-bold color-indigo-100 text-center py-2">
+                {item.type === "friend"
+                  ? "──────── Friends ────────"
+                  : "──────── Other ────────"}
+              </Text>
+            )}
+            <ChatList currentUser={user} users={[item]} />
+          </View>
         )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

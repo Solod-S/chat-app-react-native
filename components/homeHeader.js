@@ -61,7 +61,12 @@ export function HomeHeader() {
                 aspectRatio: 1,
                 borderRadius: 100,
               }}
-              source={user?.profileUrl}
+              // source={user?.profileUrl}
+              source={
+                user?.profileUrl
+                  ? { uri: user?.profileUrl }
+                  : require("../assets/images/avatar_profile.png")
+              }
               placeholder={{ blurhash }}
               contentFit="cover"
               transition={500}

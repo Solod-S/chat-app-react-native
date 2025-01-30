@@ -26,7 +26,8 @@ export function ChatItem({ currentUser, item, index, router, noBorder }) {
 
   // get last msgs
   useEffect(() => {
-    const roomId = getRoomId(currentUser?.userId, item?.userId);
+    const roomId = getRoomId(currentUser?.uid, item?.userId);
+
     const docRef = doc(db, "rooms", roomId);
     const messageRef = collection(docRef, "messages");
     const q = query(messageRef, orderBy("createdAt", "desc"), limit(1));
@@ -38,12 +39,12 @@ export function ChatItem({ currentUser, item, index, router, noBorder }) {
       setLastMessage(allMessages[0] ? allMessages[0] : null);
     });
     return unSub;
-  }, [currentUser?.userId, item?.userId]);
+  }, [currentUser?.uid, item?.userId]);
 
   // get unread msgs
   useEffect(() => {
     if (item?.userId) {
-      const roomId = getRoomId(currentUser?.userId, item?.userId);
+      const roomId = getRoomId(currentUser?.uid, item?.userId);
       const docRef = doc(db, "rooms", roomId);
       const messageRef = collection(docRef, "messages");
       const q = query(
@@ -58,12 +59,12 @@ export function ChatItem({ currentUser, item, index, router, noBorder }) {
 
       return unSub;
     }
-  }, [currentUser?.userId, item?.userId]);
+  }, [currentUser?.uid, item?.userId]);
 
   const renderLastMessage = () => {
     if (typeof lastMessage == "undefined") return "Loading...";
     if (lastMessage) {
-      if (currentUser?.userId == lastMessage?.userId)
+      if (currentUser?.uid == lastMessage?.userId)
         return "You: " + lastMessage?.text;
 
       return lastMessage?.text;
@@ -113,7 +114,12 @@ export function ChatItem({ currentUser, item, index, router, noBorder }) {
           width: hp(6),
           borderRadius: 50,
         }}
-        source={{ uri: item?.profileUrl }}
+        // source={{ uri: item?.profileUrl }}
+        source={
+          item?.profileUrl
+            ? { uri: item?.profileUrl }
+            : require("../assets/images/avatar_profile.png")
+        }
         placeholder={blurhash}
         transition={500}
       />

@@ -12,15 +12,24 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { useAuth } from "@/context/authContext";
 import { Loading } from "./loading";
 import Toast from "react-native-toast-message";
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from "react-native-popup-menu";
+import { CustomMenuItems } from "./customMenuItems";
+import { Feather, Foundation } from "@expo/vector-icons";
+import { deleteRoomMessages } from "@/utils";
 
-export function ChatRoomHeader({ user, router, myProfile }) {
+export function ChatRoomHeader({ user, router, myProfile, roomId }) {
   const [loading, setLoading] = useState(false);
   const { addToFriendsList, removeFromFriendsList } = useAuth();
 
   const addToFriends = async () => {
     try {
       setLoading(true);
-      await addToFriendsList(myProfile.userId, user.uid);
+      await addToFriendsList(myProfile.uid, user.userId);
       Toast.show({
         type: "success",
         position: "top",
@@ -41,7 +50,7 @@ export function ChatRoomHeader({ user, router, myProfile }) {
   const removeFromFriends = async () => {
     try {
       setLoading(true);
-      await removeFromFriendsList(myProfile.userId, user.uid);
+      await removeFromFriendsList(myProfile.uid, user.userId);
       Toast.show({
         type: "success",
         position: "top",
@@ -62,6 +71,28 @@ export function ChatRoomHeader({ user, router, myProfile }) {
     }
   };
 
+  const deleteChat = async () => {
+    try {
+      setLoading(true);
+      router.replace("home");
+      await deleteRoomMessages(roomId);
+      Toast.show({
+        type: "success",
+        position: "top",
+        text1: "Chat removed successfully",
+        // text2: "You have successfully removed this user from your friends.",
+        visibilityTime: 1000,
+        autoHide: true,
+        bottomOffset: 50,
+      });
+    } catch (error) {
+      console.log(`Error in deleteChat :`, error);
+      Alert.alert("Chat delete", "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Stack.Screen
       options={{
@@ -74,7 +105,11 @@ export function ChatRoomHeader({ user, router, myProfile }) {
             </TouchableOpacity>
             <View className="flex-row items-center gap-3">
               <Image
-                source={user?.profileUrl}
+                source={
+                  user?.profileUrl
+                    ? { uri: user?.profileUrl }
+                    : require("../assets/images/avatar_profile.png")
+                }
                 style={{ height: hp(4.5), aspectRatio: 1, borderRadius: 100 }}
               />
               <Text
@@ -88,26 +123,79 @@ export function ChatRoomHeader({ user, router, myProfile }) {
         ),
         headerRight: () => (
           <View className="flex-row items-center gap-8">
-            {loading ? (
-              <Loading size={hp(2.8)} />
-            ) : myProfile?.friends?.includes(user.uid) ? (
-              <AntDesign
-                name="minuscircleo"
-                size={hp(2.8)}
-                color="#737373"
-                onPress={() => removeFromFriends()}
-              />
-            ) : (
-              <AntDesign
-                name="pluscircleo"
-                size={hp(2.8)}
-                color="#737373"
-                onPress={() => addToFriends()}
-              />
-            )}
+            <Menu>
+              <MenuTrigger>
+                <Foundation name="indent-more" size={24} color="black" />
+              </MenuTrigger>
+              <MenuOptions
+                optionsContainerStyle={{
+                  shadowColor: "black",
+                  shadowOpacity: 0.3,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowRadius: 5,
+                  borderWidth: 0.1,
+                  borderRadius: 10,
+                  width: 160,
+                  marginTop: 35,
+                  marginLeft: -20,
+                }}
+              >
+                {loading ? (
+                  <Loading size={hp(2.8)} />
+                ) : myProfile?.friends?.includes(user.userId) ? (
+                  <CustomMenuItems
+                    text="Remove"
+                    action={removeFromFriends}
+                    value={null}
+                    icon={
+                      <AntDesign
+                        name="minuscircleo"
+                        size={hp(2.5)}
+                        color="#737373"
+                      />
+                    }
+                  />
+                ) : (
+                  <CustomMenuItems
+                    text="Add"
+                    action={addToFriends}
+                    value={null}
+                    icon={
+                      <AntDesign
+                        name="pluscircleo"
+                        size={hp(2.5)}
+                        color="#737373"
+                      />
+                    }
+                  />
+                )}
+                <Divider />
+                <CustomMenuItems
+                  text="Delete history"
+                  action={() =>
+                    Alert.alert(
+                      "Confirm Deletion",
+                      "Are you sure you want to delete this chat? Data recovery will not be possible.",
+                      [
+                        { text: "No", style: "cancel" },
+                        { text: "Yes", onPress: () => deleteChat() },
+                      ]
+                    )
+                  }
+                  value={null}
+                  icon={
+                    <AntDesign name="delete" size={hp(2.5)} color="#737373" />
+                  }
+                />
+              </MenuOptions>
+            </Menu>
           </View>
         ),
       }}
     ></Stack.Screen>
   );
 }
+
+const Divider = () => {
+  return <View className="p-[1px] w-full bg-neutral-200"></View>;
+};

@@ -16,13 +16,14 @@ export default function Layout() {
     segments.includes("profilePage") ||
     segments.includes("userSearch")
   );
-  // console.log(`segments`, segments, hide);
+
   return (
     <Tabs
       screenOptions={{
         tabBarStyle: {
           display: hide ? "none" : "flex",
         },
+        tabBarActiveTintColor: "#6366f1",
       }}
     >
       <Tabs.Screen

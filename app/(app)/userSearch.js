@@ -42,7 +42,7 @@ export default function UserSearch() {
   //   try {
   //     setLoading(true);
 
-  //     let q = query(usersRef, where("userId", "!=", user?.userId));
+  //     let q = query(usersRef, where("userId", "!=", user?.uid));
 
   //     const querySnapshot = await getDocs(q);
   //     const data = [];
@@ -155,10 +155,15 @@ export default function UserSearch() {
                     className="flex-row items-center p-4 border-b border-gray-200"
                   >
                     <Image
-                      source={{
-                        uri: item.profileUrl,
-                      }}
-                      className="w-12 h-12 rounded-full mr-4"
+                      // source={{
+                      //   uri: item.profileUrl,
+                      // }}
+                      source={
+                        item?.profileUrl
+                          ? { uri: item?.profileUrl }
+                          : require("../../assets/images/avatar_profile.png")
+                      }
+                      className="w-12 h-12 rounded-full mr-4 border border-indigo-100"
                     />
                     <Text className="text-lg font-medium">{item.username}</Text>
                   </View>

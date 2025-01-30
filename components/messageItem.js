@@ -29,21 +29,26 @@ export function MessageItem({ message, currentUser }) {
 
   const formattedDate = message.createdAt ? formatDate(message.createdAt) : "";
 
-  if (currentUser?.userId === message?.userId) {
+  if (currentUser?.uid === message?.userId) {
     return (
       <View className="flex-row justify-end mb-3 mr-3">
         <View style={{ width: wp(80) }}>
-          <View className="flex self-end p-3 rounded-2xl bg-white border border-neutral-200">
+          <View className="flex self-end p-3 bg-indigo-100 border border-neutral-200 rounded-2xl rounded-br-none">
             <Text
               className="font-semibold"
-              style={{ fontSize: hp(0.9), color: "#737373" }}
+              style={{ fontSize: hp(0.9), color: "#737373", opacity: 0.4 }}
             >
               {message.senderName}
             </Text>
             <Text style={{ fontSize: hp(1.9) }}>{message?.text}</Text>
             {formattedDate && (
               <Text
-                style={{ fontSize: hp(1.1), color: "#737373", marginTop: 5 }}
+                style={{
+                  fontSize: hp(0.8),
+                  color: "#737373",
+                  marginTop: 5,
+                  opacity: 0.4,
+                }}
               >
                 {formattedDate}
               </Text>
@@ -55,16 +60,23 @@ export function MessageItem({ message, currentUser }) {
   } else {
     return (
       <View style={{ width: wp(80) }} className="ml-3 mb-3">
-        <View className="flex self-start p-3 px-4 rounded-2xl bg-indigo-100 border border-neutral-200">
+        <View className="flex self-start p-3 px-4 rounded-2xl rounded-bl-none bg-white border border-neutral-200">
           <Text
             className="font-semibold"
-            style={{ fontSize: hp(0.9), color: "#737373" }}
+            style={{ fontSize: hp(0.9), color: "#737373", opacity: 0.4 }}
           >
             {message.senderName}
           </Text>
           <Text style={{ fontSize: hp(1.9) }}>{message?.text}</Text>
           {formattedDate && (
-            <Text style={{ fontSize: hp(1.1), color: "#737373", marginTop: 5 }}>
+            <Text
+              style={{
+                fontSize: hp(0.8),
+                color: "#737373",
+                marginTop: 5,
+                opacity: 0.4,
+              }}
+            >
               {formattedDate}
             </Text>
           )}

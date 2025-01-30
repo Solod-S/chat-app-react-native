@@ -45,22 +45,21 @@ export const getExpoPushNotificationToken = async () => {
 };
 
 export const sendPushNotification = async (tokens, message) => {
-  const currentToken = await getExpoPushNotificationToken();
-  if (currentToken) tokens = tokens.filter(token => token !== currentToken);
-  const expoPushUrl = "https://exp.host/--/api/v2/push/send";
-
-  const notifications = tokens.map(token => ({
-    to: token,
-    sound: "default",
-    title: message.title || "Notification",
-    body: message.body || "",
-    data: {
-      screen: "chatRoom",
-      item: message.item,
-    },
-  }));
-
   try {
+    const currentToken = await getExpoPushNotificationToken();
+    if (currentToken) tokens = tokens.filter(token => token !== currentToken);
+    const expoPushUrl = "https://exp.host/--/api/v2/push/send";
+    console.log(`tokens`, tokens.length);
+    const notifications = tokens.map(token => ({
+      to: token,
+      sound: "default",
+      title: message.title || "Notification",
+      body: message.body || "",
+      data: {
+        screen: "chatRoom",
+        item: message.item,
+      },
+    }));
     await axios.post(expoPushUrl, notifications, {
       headers: { "Content-Type": "application/json" },
     });
@@ -71,8 +70,8 @@ export const sendPushNotification = async (tokens, message) => {
 
 // Пример вызова функции
 // const tokens = [
-//   "ExponentPushToken[aWhdZqE-HdNZe9E1yjEbQ8]", // Добавьте больше токенов
-//   `ExponentPushToken[8FRx76FptLVWWSCDW_rLqX]`,
+//   "ExponentPushToken[8FRx76FptLVWWSCDW_rLqX]", // Добавьте больше токенов
+//   `ExponentPushToken[aWhdZqE-HdNZe9E1yjEbQ8]`,
 // ];
 
 // const message = {
