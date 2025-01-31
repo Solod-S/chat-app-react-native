@@ -4,24 +4,44 @@ import {
   Entypo,
   FontAwesome,
 } from "@expo/vector-icons";
-
+import { useEffect, useState } from "react";
+import { Keyboard, Platform } from "react-native";
 import { HomeHeader } from "@/components";
 
 export default function Layout() {
   const segments = useSegments();
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
-  // if screen is in the home or live stack, hide the tab bar
-  const hide = !(
-    segments.includes("home") ||
-    segments.includes("profilePage") ||
-    segments.includes("userSearch")
-  );
+  useEffect(() => {
+    if (Platform.OS !== "android") return; // Скрываем только на Android
+
+    const showListener = Keyboard.addListener("keyboardDidShow", () => {
+      setIsKeyboardVisible(true);
+    });
+    const hideListener = Keyboard.addListener("keyboardDidHide", () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
+
+  // Скрываем таб-бар только на Android при открытой клавиатуре
+  const hideTabs =
+    (Platform.OS === "android" && isKeyboardVisible) ||
+    !(
+      segments.includes("home") ||
+      segments.includes("profilePage") ||
+      segments.includes("userSearch")
+    );
 
   return (
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          display: hide ? "none" : "flex",
+          display: hideTabs ? "none" : "flex",
         },
         tabBarActiveTintColor: "#6366f1",
       }}
@@ -40,7 +60,6 @@ export default function Layout() {
         name="userSearch"
         options={{
           headerShown: false,
-          header: () => <HomeHeader />,
           tabBarLabel: "Search",
           tabBarIcon: ({ color }) => (
             <FontAwesome name="search" size={24} color={color} />

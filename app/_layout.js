@@ -8,7 +8,7 @@ import { MenuProvider } from "react-native-popup-menu";
 import * as Notifications from "expo-notifications";
 
 const MainLayout = () => {
-  const { isAuthenticated, refresh } = useAuth();
+  const { isAuthenticated, refresh, user } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
@@ -60,12 +60,14 @@ const MainLayout = () => {
     };
   }, [isAuthenticated]);
 
-  // Устанавливаем обработчик уведомлений
+  // Installing a Notification Handler
   useEffect(() => {
+    console.log("User is authorized, show notification", user?.notification);
+
     Notifications.setNotificationHandler({
       handleNotification: async () => {
         if (!isAuthenticated) {
-          console.log("Пользователь не авторизован, не показываем уведомление");
+          console.log("User is not authorized, do not show notification");
           return {
             shouldShowAlert: false,
             shouldPlaySound: false,
@@ -73,30 +75,14 @@ const MainLayout = () => {
           };
         }
 
-        console.log("Пользователь авторизован, показываем уведомление");
         return {
-          shouldShowAlert: true,
-          shouldPlaySound: true,
-          shouldSetBadge: true,
+          shouldShowAlert: user?.notification ?? false,
+          shouldPlaySound: user?.notification ?? false,
+          shouldSetBadge: user?.notification ?? false,
         };
       },
     });
-  }, [isAuthenticated]);
-
-  // // Регистрация токена для авторизованных пользователей
-  // useEffect(() => {
-  //   const registerNotifications = async () => {
-  //     if (isAuthenticated) {
-  //       const token = await getExpoPushNotificationToken();
-  //       if (token) {
-  //         console.log("Notification token:", token);
-  //         // Здесь можно отправить токен на ваш сервер
-  //       }
-  //     }
-  //   };
-
-  //   registerNotifications();
-  // }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   return (
     <View className="flex-1 bg-white">

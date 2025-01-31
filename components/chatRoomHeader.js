@@ -9,7 +9,7 @@ import {
 
 import Entypo from "@expo/vector-icons/Entypo";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useAuth } from "@/context/authContext";
+
 import { Loading } from "./loading";
 import Toast from "react-native-toast-message";
 import {
@@ -19,17 +19,23 @@ import {
   MenuTrigger,
 } from "react-native-popup-menu";
 import { CustomMenuItems } from "./customMenuItems";
-import { Feather, Foundation } from "@expo/vector-icons";
-import { deleteRoomMessages } from "@/utils";
+import { Foundation } from "@expo/vector-icons";
+import {
+  addToFriendsList,
+  deleteRoomMessages,
+  removeFromFriendsList,
+} from "@/utils";
+import { useAuth } from "@/context/authContext";
 
 export function ChatRoomHeader({ user, router, myProfile, roomId }) {
+  const { refresh } = useAuth();
   const [loading, setLoading] = useState(false);
-  const { addToFriendsList, removeFromFriendsList } = useAuth();
 
   const addToFriends = async () => {
     try {
       setLoading(true);
-      await addToFriendsList(myProfile.uid, user.userId);
+      const data = await addToFriendsList(myProfile.uid, user.userId);
+      refresh({ friends: data.friends });
       Toast.show({
         type: "success",
         position: "top",
@@ -50,7 +56,8 @@ export function ChatRoomHeader({ user, router, myProfile, roomId }) {
   const removeFromFriends = async () => {
     try {
       setLoading(true);
-      await removeFromFriendsList(myProfile.uid, user.userId);
+      const data = await removeFromFriendsList(myProfile.uid, user.userId);
+      refresh({ friends: data.friends });
       Toast.show({
         type: "success",
         position: "top",
@@ -74,7 +81,7 @@ export function ChatRoomHeader({ user, router, myProfile, roomId }) {
   const deleteChat = async () => {
     try {
       setLoading(true);
-      router.replace("home");
+      // router.replace("home");
       await deleteRoomMessages(roomId);
       Toast.show({
         type: "success",
@@ -135,7 +142,7 @@ export function ChatRoomHeader({ user, router, myProfile, roomId }) {
                   shadowRadius: 5,
                   borderWidth: 0.1,
                   borderRadius: 10,
-                  width: 160,
+                  width: 180,
                   marginTop: 35,
                   marginLeft: -20,
                 }}
@@ -171,7 +178,7 @@ export function ChatRoomHeader({ user, router, myProfile, roomId }) {
                 )}
                 <Divider />
                 <CustomMenuItems
-                  text="Delete history"
+                  text="Clear history"
                   action={() =>
                     Alert.alert(
                       "Confirm Deletion",

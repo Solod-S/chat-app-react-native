@@ -71,7 +71,7 @@ export default function UserSearch() {
       setLoading(true);
 
       const normalizedSearch = searchQuery.trim().toLowerCase();
-      console.log(`normalizedSearch`, normalizedSearch);
+
       let q = query(
         usersRef,
         where("userId", "!=", user?.uid),

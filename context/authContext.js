@@ -71,83 +71,17 @@ export const AuthContextProvider = ({ children }) => {
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       let data = docSnap.data();
+
       const finalData = {
         ...user,
         username: data.username,
         profileUrl: data.profileUrl,
         tokens: data.tokens || [],
         friends: data.friends || [],
+        notification: data.notification,
       };
 
       setUser(finalData);
-    }
-  };
-
-  const addToFriendsList = async (userId, friendId) => {
-    try {
-      const docRef = doc(db, "users", userId);
-      await updateDoc(docRef, {
-        friends: arrayUnion(friendId),
-      });
-
-      const newData = await getDoc(docRef);
-
-      if (newData.exists()) {
-        let data = newData.data();
-
-        setUser(prevUser => ({
-          ...prevUser,
-          friends: data.friends,
-        }));
-      }
-    } catch (error) {
-      console.log(`Error in addToFriendsList :`, error);
-    }
-  };
-
-  const removeFromFriendsList = async (userId, friendId) => {
-    try {
-      const docRef = doc(db, "users", userId);
-
-      await updateDoc(docRef, {
-        friends: arrayRemove(friendId),
-      });
-
-      const newData = await getDoc(docRef);
-
-      if (newData.exists()) {
-        let data = newData.data();
-
-        setUser(prevUser => ({
-          ...prevUser,
-          friends: data.friends,
-        }));
-      }
-    } catch (error) {
-      console.log(`Error in removeFromFriendsList:`, error);
-    }
-  };
-
-  const deleteChatItem = async (userId, friendId) => {
-    try {
-      const docRef = doc(db, "users", userId);
-
-      await updateDoc(docRef, {
-        friends: arrayRemove(friendId),
-      });
-
-      const newData = await getDoc(docRef);
-
-      if (newData.exists()) {
-        let data = newData.data();
-
-        setUser(prevUser => ({
-          ...prevUser,
-          friends: data.friends,
-        }));
-      }
-    } catch (error) {
-      console.log(`Error in removeFromFriendsList:`, error);
     }
   };
 
@@ -204,6 +138,7 @@ export const AuthContextProvider = ({ children }) => {
         userId: response?.user?.uid,
         tokens: [],
         friends: [],
+        notification: true,
       });
       await updateTokenData(response.user.uid);
       return { success: true, data: response?.user };
@@ -217,14 +152,16 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  const updateUserInfo = async (username, profileUrl) => {
+  const saveProfileSettings = async (username, profileUrl, notification) => {
+    console.log(`username, profileUrl`, notification);
     try {
-      const userDocRef = doc(db, "users", user?.userId);
+      const userDocRef = doc(db, "users", user?.uid);
 
       await updateDoc(userDocRef, {
         username: username,
         profileUrl: profileUrl,
         usernameLower: username.toLowerCase(),
+        notification: notification,
       });
 
       setUser(prevUser => ({
@@ -233,6 +170,7 @@ export const AuthContextProvider = ({ children }) => {
         profileUrl: profileUrl || prevUser.profileUrl,
         usernameLower:
           username.toLowerCase() || prevUser.username.toLowerCase(),
+        notification: notification,
       }));
 
       return { success: true };
@@ -242,8 +180,10 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  const refresh = () => {
-    setUser(prevState => ({ ...prevState }));
+  const refresh = (data = null) => {
+    data
+      ? setUser(prevState => ({ ...prevState, ...data }))
+      : setUser(prevState => ({ ...prevState }));
   };
 
   const removeTokenData = async (id, token) => {
@@ -265,10 +205,8 @@ export const AuthContextProvider = ({ children }) => {
         login,
         register,
         logout,
-        updateUserInfo,
+        saveProfileSettings,
         updateUserData,
-        addToFriendsList,
-        removeFromFriendsList,
         refresh,
       }}
     >

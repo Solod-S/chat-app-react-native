@@ -49,7 +49,6 @@ export const sendPushNotification = async (tokens, message) => {
     const currentToken = await getExpoPushNotificationToken();
     if (currentToken) tokens = tokens.filter(token => token !== currentToken);
     const expoPushUrl = "https://exp.host/--/api/v2/push/send";
-    console.log(`tokens`, tokens.length);
     const notifications = tokens.map(token => ({
       to: token,
       sound: "default",

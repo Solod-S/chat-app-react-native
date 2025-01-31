@@ -17,7 +17,14 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 
-export function ChatItem({ currentUser, item, index, router, noBorder }) {
+export function ChatItem({
+  currentUser,
+  item,
+  index,
+  router,
+  noBorder,
+  onLongPress,
+}) {
   const [lastMessage, setLastMessage] = useState(undefined);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const openChatRoom = () => {
@@ -104,6 +111,7 @@ export function ChatItem({ currentUser, item, index, router, noBorder }) {
   return (
     <TouchableOpacity
       onPress={openChatRoom}
+      onLongPress={onLongPress}
       className={`flex-row justify-between items-center gap-3 mx-3 mb-4 pb-2 ${
         noBorder ? "" : "border-b-[1px] border-b-neutral-200"
       }`}
