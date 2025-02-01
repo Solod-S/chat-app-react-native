@@ -122,7 +122,6 @@ export function ChatItem({
           width: hp(6),
           borderRadius: 50,
         }}
-        // source={{ uri: item?.profileUrl }}
         source={
           item?.profileUrl
             ? { uri: item?.profileUrl }

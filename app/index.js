@@ -8,7 +8,7 @@ export default function StartPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // для нормальной работы пуша и перехода на андроиде
+    // for normal operation of push and transition on android
     if (isAuthenticated && router.canGoBack() && Platform.OS === "android") {
       router.dismiss();
     }

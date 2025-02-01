@@ -18,8 +18,6 @@ export function CustomMenuItems({ text, action, value, icon }) {
         style={{
           paddingVertical: 6,
           paddingHorizontal: 8,
-          // borderBottomWidth: 1,
-          // borderBottomColor: "#e0e0e0",
         }}
         className="px-4 flex-row justify-between items-center"
       >

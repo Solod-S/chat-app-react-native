@@ -107,7 +107,10 @@ export function ChatRoomHeader({ user, router, myProfile, roomId }) {
         headerShadowVisible: false,
         headerLeft: () => (
           <View className="flex-row items-center gap-4">
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{ zIndex: 51 }}
+            >
               <Entypo name="chevron-left" size={hp(4)} color="#737373" />
             </TouchableOpacity>
             <View className="flex-row items-center gap-3">
@@ -131,7 +134,7 @@ export function ChatRoomHeader({ user, router, myProfile, roomId }) {
         headerRight: () => (
           <View className="flex-row items-center gap-8">
             <Menu>
-              <MenuTrigger>
+              <MenuTrigger style={{ zIndex: 51 }}>
                 <Foundation name="indent-more" size={24} color="black" />
               </MenuTrigger>
               <MenuOptions

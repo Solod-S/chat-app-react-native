@@ -28,6 +28,7 @@ export default function ProfilePage() {
   const [profileUrl, setProfileUrl] = useState("");
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
+  // get user data
   useFocusEffect(
     React.useCallback(() => {
       const getUser = async () => {

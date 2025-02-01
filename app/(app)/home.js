@@ -13,6 +13,7 @@ export default function Home() {
   const [users, setUsers] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
+  // follow the updates of friends and chats
   useEffect(() => {
     let interval;
 

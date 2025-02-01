@@ -150,7 +150,7 @@ export default function ChatRoom() {
       textRef.current = "";
       if (inputRef) inputRef?.current?.clear();
 
-      const newDoc = await addDoc(messageRef, {
+      await addDoc(messageRef, {
         userId: user?.uid,
         text: message,
         profileUrl: user?.profileUrl,
@@ -158,7 +158,7 @@ export default function ChatRoom() {
         createdAt: Timestamp.fromDate(new Date()),
         isRead: false,
       });
-      // console.log("new message id: ", newDoc.id);
+
       refresh();
     } catch (error) {
       console.log(`Error in handleSendMessage: `, error);

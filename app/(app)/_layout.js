@@ -13,7 +13,7 @@ export default function Layout() {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    if (Platform.OS !== "android") return; // Скрываем только на Android
+    if (Platform.OS !== "android") return;
 
     const showListener = Keyboard.addListener("keyboardDidShow", () => {
       setIsKeyboardVisible(true);
@@ -28,7 +28,8 @@ export default function Layout() {
     };
   }, []);
 
-  // Скрываем таб-бар только на Android при открытой клавиатуре
+  // Hide the tab bar only on Android when the keyboard is open
+  // Hide the tab bar on unnecessary tabs
   const hideTabs =
     (Platform.OS === "android" && isKeyboardVisible) ||
     !(

@@ -33,7 +33,7 @@ export function ChatList({ users, currentUser }) {
   };
 
   const handleDelete = userId => {
-    Vibration.vibrate(200); // Вибрация на 100 мс перед показом Alert
+    Vibration.vibrate(200); // Vibrate for 100ms before showing the Alert
     Alert.alert("Delete user?", "Are you sure you want to delete this chat?", [
       { text: "Cancel", style: "cancel" },
       {

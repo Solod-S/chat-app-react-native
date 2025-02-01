@@ -15,6 +15,13 @@
 
 Buddy Chat is a modern messaging application designed to bring friends closer through seamless and intuitive communication. Whether you're planning a get-together, sharing memorable moments, or simply staying connected, Buddy Chat provides a space where conversations feel personal and effortless.
 
+<div align="center">
+
+https://github.com/user-attachments/assets/885601fe-599f-4150-88ec-ded14a7e2752
+
+  <br />
+</div>
+
 Key Features:
 
 - Secure Email-Based Login: With email-based authentication, Buddy Chat ensures a safe and streamlined sign-in process, protecting user privacy while maintaining simplicity.

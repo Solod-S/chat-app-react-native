@@ -16,7 +16,7 @@ import {
 } from "react-native-responsive-screen";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
-import { query, where, getDocs } from "firebase/firestore"; // Убираем limit и startAfter
+import { query, where, getDocs } from "firebase/firestore";
 import { usersRef } from "../../firebaseConfig";
 import { useAuth } from "../../context/authContext";
 import { useRouter } from "expo-router";
@@ -38,34 +38,6 @@ export default function UserSearch() {
     });
   };
 
-  // const getUsers = async () => {
-  //   try {
-  //     setLoading(true);
-
-  //     let q = query(usersRef, where("userId", "!=", user?.uid));
-
-  //     const querySnapshot = await getDocs(q);
-  //     const data = [];
-
-  //     querySnapshot.forEach(doc => {
-  //       const user = doc.data();
-
-  //       if (
-  //         searchQuery.trim() === "" ||
-  //         user.username.toLowerCase().includes(searchQuery.toLowerCase())
-  //       ) {
-  //         data.push(user);
-  //       }
-  //     });
-
-  //     setUsers(data);
-  //   } catch (error) {
-  //     console.error("Error fetching users: ", error.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const getUsers = async () => {
     try {
       setLoading(true);
@@ -75,8 +47,8 @@ export default function UserSearch() {
       let q = query(
         usersRef,
         where("userId", "!=", user?.uid),
-        where("usernameLower", ">=", normalizedSearch)
-        // where("usernameLower", "<=", normalizedSearch + "\uf8ff") // Firestore range query
+        where("usernameLower", ">=", normalizedSearch),
+        where("usernameLower", "<=", normalizedSearch + "\uf8ff") // Firestore range query
       );
 
       const querySnapshot = await getDocs(q);
@@ -155,9 +127,6 @@ export default function UserSearch() {
                     className="flex-row items-center p-4 border-b border-gray-200"
                   >
                     <Image
-                      // source={{
-                      //   uri: item.profileUrl,
-                      // }}
                       source={
                         item?.profileUrl
                           ? { uri: item?.profileUrl }
