@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Chat app",
+    "name": "Easy Chat Box",
     "slug": "chat-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -37,7 +37,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/notification_icon.png",
+          "icon": "./assets/images/splash-icon.png",
           "color": "#ffffff",
           "defaultChannel": "default",
           // "sounds": [

@@ -9,7 +9,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import * as Notifications from "expo-notifications";
 
 const MainLayout = () => {
-  const { isAuthenticated, refresh, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
@@ -31,7 +31,7 @@ const MainLayout = () => {
       <Stack>
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
         <Stack.Screen name="screens/chatRoom" />
-        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="index" />
         <Stack.Screen name="signIn" options={{ headerShown: false }} />
         <Stack.Screen name="signUp" options={{ headerShown: false }} />
       </Stack>

